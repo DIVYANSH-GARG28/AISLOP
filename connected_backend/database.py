@@ -146,4 +146,14 @@ def clean_doc(doc: Optional[Dict[str, Any]]) -> Optional[Dict[str, Any]]:
     elif "avatarUrl" in cleaned and "avatar_url" not in cleaned:
         cleaned["avatar_url"] = cleaned["avatarUrl"]
 
+    if "institutional_id" in cleaned and "institutionalId" not in cleaned:
+        cleaned["institutionalId"] = cleaned["institutional_id"]
+    elif "institutionalId" in cleaned and "institutional_id" not in cleaned:
+        cleaned["institutional_id"] = cleaned["institutionalId"]
+
+    if "linkedin_url" in cleaned and "linkedInUrl" not in cleaned:
+        cleaned["linkedInUrl"] = cleaned["linkedin_url"]
+    elif "linkedInUrl" in cleaned and "linkedin_url" not in cleaned:
+        cleaned["linkedin_url"] = cleaned["linkedInUrl"]
+
     return cleaned

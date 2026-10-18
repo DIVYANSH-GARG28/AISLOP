@@ -1,0 +1,144 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum Role {
+  STUDENT
+  ALUMNI
+  ADMIN
+}
+
+enum MentorshipStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+  COMPLETED
+}
+
+enum JobType {
+  FULL_TIME
+  PART_TIME
+  INTERNSHIP
+  CONTRACT
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String
+  password  String?
+  role      Role     @default(STUDENT)
+  avatarUrl String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  studentProfile StudentProfile?
+  alumniProfile  AlumniProfile?
+  postedJobs     Job[]           @relation("PostedJobs")
+}
+
+model StudentProfile {
+  id             String   @id @default(cuid())
+  userId         String   @unique
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  major          String?
+  graduationYear Int?
+  bio            String?
+  targetRole     String?
+  targetCompany  String?  @default("Google DeepMind")
+  targetDays     Int      @default(100)
+  skills         String[] @default([])
+  gpa            Float?
+  githubUrl      String?
+  linkedinUrl    String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  mentorships    Mentorship[]    @relation("StudentMentorships")
+  careerRoadmaps CareerRoadmap[]
+}
+
+model AlumniProfile {
+  id                String   @id @default(cuid())
+  userId            String   @unique
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  company           String?
+  role              String?
+  graduationYear    Int?
+  yearsOfExperience Int?     @default(0)
+  major             String?
+  degree            String?
+  location          String?
+  bio               String?
+  skills            String[] @default([])
+  isMentor          Boolean  @default(true)
+  mentorBio         String?
+  maxMentees        Int      @default(5)
+  linkedinUrl       String?
+  availability      String?  @default("Available for Mentorship")
+  impactScore       Int?     @default(850)
+  menteesGuided     Int?     @default(10)
+  badgeTier         String?  @default("Verified Alum ✨")
+  matchScore        Int?     @default(85)
+  matchReason       String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  mentorships Mentorship[] @relation("AlumniMentorships")
+}
+
+model Mentorship {
+  id        String           @id @default(cuid())
+  mentorId  String
+  mentor    AlumniProfile    @relation("AlumniMentorships", fields: [mentorId], references: [id], onDelete: Cascade)
+  menteeId  String
+  mentee    StudentProfile   @relation("StudentMentorships", fields: [menteeId], references: [id], onDelete: Cascade)
+  status    MentorshipStatus @default(PENDING)
+  message   String?
+  goals     String[]         @default([])
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
+}
+
+model Job {
+  id                String   @id @default(cuid())
+  title             String
+  company           String
+  location          String?
+  type              JobType  @default(FULL_TIME)
+  description       String
+  requirements      String[] @default([])
+  referralAvailable Boolean  @default(true)
+  applyUrl          String?
+  postedById        String
+  postedBy          User     @relation("PostedJobs", fields: [postedById], references: [id], onDelete: Cascade)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+}
+
+model CareerRoadmap {
+  id              String         @id @default(cuid())
+  studentId       String
+  student         StudentProfile @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  targetRole      String
+  roadmapData     Json
+  skillsToAcquire String[]       @default([])
+  generatedAt     DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+}
+
+model EmbeddingIndex {
+  id         String   @id @default(cuid())
+  entityType String // "ALUMNI", "STUDENT", "JOB", "ROADMAP"
+  entityId   String
+  vectorText String? // String representation or metadata
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@unique([entityType, entityId])
+}

@@ -53,21 +53,49 @@ async def get_mentor_recommendations(
     async for doc in cursor:
         alumni = clean_doc(doc)
         score, reasons = calculate_mentor_match(student_profile, alumni)
+        inst_id = alumni.get("institutional_id") or alumni.get("institutionalId") or f"KCE-ALUM-{alumni.get('graduation_year', 2021)}-{str(alumni.get('id', '001')).replace('alum_', '').replace('alumni_', '').replace('alum-', '').zfill(3)}"
+        linkedin = alumni.get("linkedin_url") or alumni.get("linkedInUrl") or alumni.get("linkedin") or ""
+        role_name = alumni.get("current_role") or alumni.get("title") or alumni.get("role", "Engineer")
+        avatar = alumni.get("avatar_url") or alumni.get("avatar") or ""
+        grad_year = alumni.get("graduation_year") or alumni.get("graduationYear", 2021)
+        impact = alumni.get("impact_score") or alumni.get("impactScore", 800)
+        mentees = alumni.get("mentees_guided") or alumni.get("menteesGuided", 10)
+        badge = alumni.get("badge_tier") or alumni.get("badgeTier", "Verified Alum ✨")
+
         recommendations.append({
             "alumni_id": alumni.get("id"),
+            "id": alumni.get("id"),
+            "institutional_id": inst_id,
+            "institutionalId": inst_id,
             "name": alumni.get("name"),
-            "current_role": alumni.get("current_role") or alumni.get("title", "Engineer"),
+            "current_role": role_name,
+            "title": role_name,
+            "role": role_name,
             "company": alumni.get("company", "Tech Company"),
-            "avatar_url": alumni.get("avatar_url") or alumni.get("avatar", ""),
-            "graduation_year": alumni.get("graduation_year", 2021),
+            "avatar_url": avatar,
+            "avatar": avatar,
+            "graduation_year": grad_year,
+            "graduationYear": grad_year,
+            "degree": alumni.get("degree", "B.Tech Engineering"),
+            "major": alumni.get("major", "Engineering"),
             "skills": alumni.get("skills", []),
-            "impact_score": alumni.get("impact_score", 800),
-            "mentees_guided": alumni.get("mentees_guided", 5),
-            "badge_tier": alumni.get("badge_tier", "Verified Alum ✨"),
+            "impact_score": impact,
+            "impactScore": impact,
+            "mentees_guided": mentees,
+            "menteesGuided": mentees,
+            "badge_tier": badge,
+            "badgeTier": badge,
             "is_verified": alumni.get("is_verified", True),
+            "isVerified": alumni.get("is_verified", True),
             "availability": alumni.get("availability", "Available for Mentorship"),
+            "linkedin_url": linkedin,
+            "linkedInUrl": linkedin,
+            "linkedin": linkedin,
+            "bio": alumni.get("bio", ""),
             "match_score": score,
-            "match_reasons": reasons
+            "matchScore": score,
+            "match_reasons": reasons,
+            "matchReasons": reasons
         })
 
     # Sort descending by explainable match score

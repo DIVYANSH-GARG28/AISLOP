@@ -1,0 +1,875 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ConnectEd AI Engine - Test Playground</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #0f172a;
+            --panel-bg: rgba(30, 41, 59, 0.7);
+            --border-color: rgba(255, 255, 255, 0.1);
+            --primary: #6366f1;
+            --primary-gradient: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            --accent: #10b981;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --card-bg: #1e293b;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            background-image: 
+                radial-gradient(at 10% 10%, rgba(99, 102, 241, 0.15) 0px, transparent 50%),
+                radial-gradient(at 90% 90%, rgba(139, 92, 246, 0.15) 0px, transparent 50%);
+            color: var(--text-main);
+            min-height: 100vh;
+            padding: 2rem;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 1.5rem;
+            margin-bottom: 2rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .logo-area h1 {
+            font-size: 1.8rem;
+            font-weight: 800;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .logo-area p {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            margin-top: 0.2rem;
+        }
+
+        .status-badge {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--accent);
+            padding: 0.4rem 1rem;
+            border-radius: 9999px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            border: 1px solid rgba(16, 185, 129, 0.2);
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background-color: var(--accent);
+            border-radius: 50%;
+            box-shadow: 0 0 8px var(--accent);
+        }
+
+        /* Tabs Navigation */
+        .tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 2rem;
+            background: rgba(15, 23, 42, 0.6);
+            padding: 0.4rem;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 0.75rem 1rem;
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            font-weight: 600;
+            font-size: 0.9rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .tab-btn:hover {
+            color: var(--text-main);
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .tab-btn.active {
+            background: var(--primary-gradient);
+            color: white;
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+        }
+
+        /* Tab Content Panes */
+        .tab-pane {
+            display: none;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+        }
+
+        .tab-pane.active {
+            display: grid;
+        }
+
+        @media (max-width: 900px) {
+            .tab-pane {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Panel Cards */
+        .panel {
+            background: var(--panel-bg);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 1.5rem;
+        }
+
+        .panel-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 1.2rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--text-main);
+        }
+
+        /* Form Elements */
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            margin-bottom: 0.4rem;
+        }
+
+        input[type="text"], input[type="number"], textarea, select {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            background: rgba(15, 23, 42, 0.8);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-main);
+            font-size: 0.9rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        input[type="text"]:focus, textarea:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 90px;
+        }
+
+        .btn-submit {
+            width: 100%;
+            padding: 0.85rem;
+            background: var(--primary-gradient);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-weight: 700;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: opacity 0.2s, transform 0.1s;
+            margin-top: 0.5rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-submit:hover {
+            opacity: 0.95;
+        }
+
+        .btn-submit:active {
+            transform: scale(0.99);
+        }
+
+        /* Output Display */
+        .results-container {
+            max-height: 520px;
+            overflow-y: auto;
+            padding-right: 0.5rem;
+        }
+
+        .results-container::-webkit-scrollbar {
+            width: 6px;
+        }
+        .results-container::-webkit-scrollbar-thumb {
+            background: rgba(255,255,255,0.15);
+            border-radius: 3px;
+        }
+
+        .result-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            transition: border-color 0.2s;
+        }
+
+        .result-card:hover {
+            border-color: rgba(99, 102, 241, 0.4);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 0.5rem;
+        }
+
+        .card-title {
+            font-weight: 700;
+            font-size: 1rem;
+            color: #ffffff;
+        }
+
+        .card-subtitle {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .badge {
+            padding: 0.25rem 0.6rem;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            background: rgba(99, 102, 241, 0.2);
+            color: #818cf8;
+            border: 1px solid rgba(99, 102, 241, 0.3);
+        }
+
+        .badge-success {
+            background: rgba(16, 185, 129, 0.2);
+            color: #34d399;
+            border-color: rgba(16, 185, 129, 0.3);
+        }
+
+        .skills-tag-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.4rem;
+            margin: 0.6rem 0;
+        }
+
+        .skill-tag {
+            background: rgba(255, 255, 255, 0.06);
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            color: #cbd5e1;
+        }
+
+        .reason-box {
+            font-size: 0.85rem;
+            color: #94a3b8;
+            line-height: 1.4;
+            background: rgba(15, 23, 42, 0.4);
+            padding: 0.6rem;
+            border-radius: 6px;
+            border-left: 3px solid var(--primary);
+            margin-top: 0.5rem;
+        }
+
+        .phase-item {
+            border-left: 2px dashed var(--primary);
+            padding-left: 1rem;
+            margin-bottom: 1.2rem;
+            position: relative;
+        }
+
+        .phase-item::before {
+            content: '';
+            position: absolute;
+            left: -6px;
+            top: 0;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: var(--primary);
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 18px;
+            height: 18px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .empty-placeholder {
+            text-align: center;
+            padding: 3rem 1rem;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        pre.raw-json {
+            background: #090d16;
+            padding: 1rem;
+            border-radius: 8px;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.8rem;
+            color: #a7f3d0;
+            overflow-x: auto;
+            max-height: 300px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <div class="logo-area">
+            <h1>ConnectEd AI Engine</h1>
+            <p>Interactive Test Playground for Python AI Services (FastAPI + Gemini LLM)</p>
+        </div>
+        <div class="status-badge" id="serverStatus">
+            <span class="status-dot"></span>
+            AI Engine Online (v2.0.0)
+        </div>
+    </header>
+
+    <!-- Navigation Tabs -->
+    <div class="tabs">
+        <button class="tab-btn active" onclick="switchTab('searchTab', this)">
+            🔍 Alumni Search
+        </button>
+        <button class="tab-btn" onclick="switchTab('studentMatchTab', this)">
+            🎓 Student Profile Match
+        </button>
+        <button class="tab-btn" onclick="switchTab('parserTab', this)">
+            📄 AI Resume & Bio Parser
+        </button>
+        <button class="tab-btn" onclick="switchTab('roadmapTab', this)">
+            🚀 Career Goal Roadmap
+        </button>
+    </div>
+
+    <!-- TAB 1: Alumni Search -->
+    <div id="searchTab" class="tab-pane active">
+        <div class="panel">
+            <div class="panel-title">🔍 Natural Language Alumni Search</div>
+            <div class="form-group">
+                <label>Search Query</label>
+                <input type="text" id="searchQueryInput" value="DevOps engineers with Kubernetes and AWS experience" placeholder="e.g. Machine learning engineers at Google">
+            </div>
+            <button class="btn-submit" onclick="runAlumniSearch()">
+                <span id="searchBtnText">Run Semantic Search</span>
+            </button>
+        </div>
+        <div class="panel">
+            <div class="panel-title">⚡ Matched Alumni Results</div>
+            <div class="results-container" id="searchResults">
+                <div class="empty-placeholder">Submit a search query on the left to test semantic alumni matching.</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- TAB 2: Student Profile Match -->
+    <div id="studentMatchTab" class="tab-pane">
+        <div class="panel">
+            <div class="panel-title">🎓 Student Profile Context</div>
+            <div class="form-group">
+                <label>Student Name</label>
+                <input type="text" id="pmStudentName" value="Sidharth">
+            </div>
+            <div class="form-group">
+                <label>Student Bio / Summary</label>
+                <textarea id="pmStudentBio">Final year Computer Science student passionate about Cloud Native, DevOps, and backend microservices.</textarea>
+            </div>
+            <div class="form-group">
+                <label>Current Skills (comma separated)</label>
+                <input type="text" id="pmStudentSkills" value="Python, Linux, Docker, Git, SQL">
+            </div>
+            <div class="form-group">
+                <label>Target Role & Companies</label>
+                <input type="text" id="pmTargetRole" value="DevOps Engineer (Google, Flipkart)">
+            </div>
+            <div class="form-group">
+                <label>Search Prompt</label>
+                <input type="text" id="pmPrompt" value="Find senior DevOps mentors with AWS experience">
+            </div>
+            <button class="btn-submit" onclick="runProfileMatch()">
+                <span id="pmBtnText">Find Mentors for Student</span>
+            </button>
+        </div>
+        <div class="panel">
+            <div class="panel-title">👤 Recommended Alumni Mentors</div>
+            <div class="results-container" id="pmResults">
+                <div class="empty-placeholder">Fill student profile & prompt to find tailored mentorship matches.</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- TAB 3: AI Resume & Bio Parser & Mentor Matcher -->
+    <div id="parserTab" class="tab-pane">
+        <div class="panel">
+            <div class="panel-title">📄 AI Resume Parser & Mentor Matcher</div>
+            <div class="form-group">
+                <label>Option A: Paste Raw Resume / Bio Text</label>
+                <textarea id="parseBioText" style="min-height: 140px;">Sidharth is a Senior Full-Stack Cloud Engineer based in Bengaluru with 4 years experience in Python, FastAPI, React, Docker, Kubernetes, and AWS. Graduated from IIT Madras with B.Tech CS. Email: sidharth@connected.edu</textarea>
+            </div>
+            <div style="display: flex; gap: 0.5rem;">
+                <button class="btn-submit" onclick="parseRawTextBio()">
+                    <span id="parseTextBtn">Parse Profile</span>
+                </button>
+                <button class="btn-submit" style="background: linear-gradient(135deg, #ec4899 0%, #8b5cf6 100%);" onclick="matchRawTextResume()">
+                    <span id="matchTextBtn">🎯 Match Alumni from Resume</span>
+                </button>
+            </div>
+
+            <hr style="border: 0; border-top: 1px solid var(--border-color); margin: 1.5rem 0;">
+
+            <div class="form-group">
+                <label>Option B: Upload Resume PDF File</label>
+                <input type="file" id="resumePdfInput" accept=".pdf">
+            </div>
+            <div style="display: flex; gap: 0.5rem;">
+                <button class="btn-submit" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);" onclick="uploadPdfResume()">
+                    <span id="uploadPdfBtn">Parse PDF</span>
+                </button>
+                <button class="btn-submit" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);" onclick="matchPdfResume()">
+                    <span id="matchPdfBtn">🎯 Match Alumni from PDF</span>
+                </button>
+            </div>
+        </div>
+        <div class="panel">
+            <div class="panel-title">✨ Resume Profile & Alumni Matches</div>
+            <div class="results-container" id="parseResults">
+                <div class="empty-placeholder">Paste text or upload a PDF resume to extract profile and match top alumni mentors.</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- TAB 4: Career Goal Roadmap -->
+    <div id="roadmapTab" class="tab-pane">
+        <div class="panel">
+            <div class="panel-title">🚀 AI Career Goal & Roadmap Generator</div>
+            <div class="form-group">
+                <label>Student Name</label>
+                <input type="text" id="rmName" value="Sidharth">
+            </div>
+            <div class="form-group">
+                <label>Target Career Role</label>
+                <input type="text" id="rmRole" value="DevOps Engineer">
+            </div>
+            <div class="form-group">
+                <label>Target Company Focus</label>
+                <input type="text" id="rmCompany" value="Atlassian">
+            </div>
+            <div class="form-group">
+                <label>Current Skills (comma separated)</label>
+                <input type="text" id="rmSkills" value="Python, Linux, SQL, Git">
+            </div>
+            <div class="form-group">
+                <label>Timeline (Weeks)</label>
+                <input type="number" id="rmWeeks" value="12" min="4" max="24">
+            </div>
+            <button class="btn-submit" onclick="generateRoadmap()">
+                <span id="roadmapBtnText">Generate 4-Phase Learning Roadmap</span>
+            </button>
+        </div>
+        <div class="panel">
+            <div class="panel-title">📊 Skill-Gap Analysis & Roadmap</div>
+            <div class="results-container" id="roadmapResults">
+                <div class="empty-placeholder">Define target career goal to generate personalized roadmap & mentor matches.</div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    const API_BASE = "http://localhost:8000";
+
+    function switchTab(tabId, btnElement) {
+        document.querySelectorAll('.tab-pane').forEach(el => el.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+        document.getElementById(tabId).classList.add('active');
+        btnElement.classList.add('active');
+    }
+
+    // 1. Run Semantic Alumni Search
+    async function runAlumniSearch() {
+        const query = document.getElementById('searchQueryInput').value;
+        const resBox = document.getElementById('searchResults');
+        const btnText = document.getElementById('searchBtnText');
+
+        if (!query.trim()) return alert("Please enter a search query.");
+
+        btnText.innerHTML = '<span class="loading-spinner"></span> Searching LLM...';
+        resBox.innerHTML = '<div class="empty-placeholder">Analyzing alumni profiles with Gemini LLM...</div>';
+
+        try {
+            const resp = await fetch(`${API_BASE}/api/ai/alumni-search`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ query: query })
+            });
+            const data = await resp.json();
+            
+            if (data.matches && data.matches.length > 0) {
+                let html = '';
+                data.matches.forEach(m => {
+                    html += `
+                        <div class="result-card">
+                            <div class="card-header">
+                                <div>
+                                    <div class="card-title">${m.name}</div>
+                                    <div class="card-subtitle">${m.role} at ${m.company}</div>
+                                </div>
+                                <span class="badge badge-success">${m.matchPercentage} Match</span>
+                            </div>
+                            <div class="skills-tag-list">
+                                ${m.matchedSkills.map(s => `<span class="skill-tag">${s}</span>`).join('')}
+                            </div>
+                            <div class="reason-box">💡 <b>Reason:</b> ${m.reason}</div>
+                        </div>
+                    `;
+                });
+                resBox.innerHTML = html;
+            } else {
+                resBox.innerHTML = '<div class="empty-placeholder">No matching alumni profiles found.</div>';
+            }
+        } catch (err) {
+            resBox.innerHTML = `<div class="empty-placeholder" style="color: #ef4444;">Error connecting to backend: ${err.message}</div>`;
+        } finally {
+            btnText.innerHTML = 'Run Semantic Search';
+        }
+    }
+
+    // 2. Run Profile Match
+    async function runProfileMatch() {
+        const name = document.getElementById('pmStudentName').value;
+        const bio = document.getElementById('pmStudentBio').value;
+        const skills = document.getElementById('pmStudentSkills').value.split(',').map(s => s.trim()).filter(Boolean);
+        const targetRole = document.getElementById('pmTargetRole').value;
+        const prompt = document.getElementById('pmPrompt').value;
+        const resBox = document.getElementById('pmResults');
+        const btnText = document.getElementById('pmBtnText');
+
+        btnText.innerHTML = '<span class="loading-spinner"></span> Matching Mentors...';
+        resBox.innerHTML = '<div class="empty-placeholder">Calculating mentor scores...</div>';
+
+        try {
+            const resp = await fetch(`${API_BASE}/api/ai/alumni-search-with-profile`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    userPrompt: prompt,
+                    studentProfile: {
+                        name: name,
+                        bio: bio,
+                        skills: skills,
+                        targetRole: targetRole,
+                        targetCompanies: []
+                    }
+                })
+            });
+            const data = await resp.json();
+            
+            if (data.matches && data.matches.length > 0) {
+                let html = '';
+                data.matches.forEach(m => {
+                    html += `
+                        <div class="result-card">
+                            <div class="card-header">
+                                <div>
+                                    <div class="card-title">${m.name}</div>
+                                    <div class="card-subtitle">${m.role} @ ${m.company}</div>
+                                </div>
+                                <span class="badge">Score: ${m.matchScore} (${m.matchPercentage})</span>
+                            </div>
+                            <div class="skills-tag-list">
+                                ${m.matchedSkills.map(s => `<span class="skill-tag">${s}</span>`).join('')}
+                            </div>
+                            <div class="reason-box">🎯 ${m.reason}</div>
+                        </div>
+                    `;
+                });
+                resBox.innerHTML = html;
+            } else {
+                resBox.innerHTML = '<div class="empty-placeholder">No matching mentors found.</div>';
+            }
+        } catch (err) {
+            resBox.innerHTML = `<div class="empty-placeholder" style="color: #ef4444;">Error: ${err.message}</div>`;
+        } finally {
+            btnText.innerHTML = 'Find Mentors for Student';
+        }
+    }
+
+    // 3. Parse Raw Bio Text
+    async function parseRawTextBio() {
+        const rawText = document.getElementById('parseBioText').value;
+        const resBox = document.getElementById('parseResults');
+        const btnText = document.getElementById('parseTextBtn');
+
+        btnText.innerHTML = '<span class="loading-spinner"></span> Extracting...';
+
+        try {
+            const resp = await fetch(`${API_BASE}/api/ai/parse-profile-text`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ rawText: rawText, userRole: "alumni" })
+            });
+            const data = await resp.json();
+            renderParsedProfile(data.profile, null, resBox);
+        } catch (err) {
+            resBox.innerHTML = `<div class="empty-placeholder" style="color: #ef4444;">Error: ${err.message}</div>`;
+        } finally {
+            btnText.innerHTML = 'Parse Profile';
+        }
+    }
+
+    // 3B. Match Alumni from Raw Resume Text
+    async function matchRawTextResume() {
+        const rawText = document.getElementById('parseBioText').value;
+        const resBox = document.getElementById('parseResults');
+        const btnText = document.getElementById('matchTextBtn');
+
+        btnText.innerHTML = '<span class="loading-spinner"></span> Parsing & Matching...';
+        resBox.innerHTML = '<div class="empty-placeholder">Parsing resume with Gemini LLM and matching alumni...</div>';
+
+        try {
+            const resp = await fetch(`${API_BASE}/api/ai/match-resume-text`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ rawText: rawText })
+            });
+            const data = await resp.json();
+            renderParsedProfile(data.extractedProfile, data.matchedAlumni, resBox);
+        } catch (err) {
+            resBox.innerHTML = `<div class="empty-placeholder" style="color: #ef4444;">Error: ${err.message}</div>`;
+        } finally {
+            btnText.innerHTML = '🎯 Match Alumni from Resume';
+        }
+    }
+
+    // 3C. Upload PDF Resume
+    async function uploadPdfResume() {
+        const fileInput = document.getElementById('resumePdfInput');
+        const resBox = document.getElementById('parseResults');
+        const btnText = document.getElementById('uploadPdfBtn');
+
+        if (!fileInput.files[0]) return alert("Please select a PDF file first.");
+
+        btnText.innerHTML = '<span class="loading-spinner"></span> Extracting PDF...';
+        const formData = new FormData();
+        formData.append('file', fileInput.files[0]);
+
+        try {
+            const resp = await fetch(`${API_BASE}/api/ai/parse-resume-pdf`, {
+                method: 'POST',
+                body: formData
+            });
+            const data = await resp.json();
+            renderParsedProfile(data.profile, null, resBox);
+        } catch (err) {
+            resBox.innerHTML = `<div class="empty-placeholder" style="color: #ef4444;">Error parsing PDF: ${err.message}</div>`;
+        } finally {
+            btnText.innerHTML = 'Parse PDF';
+        }
+    }
+
+    // 3D. Match Alumni from PDF Resume
+    async function matchPdfResume() {
+        const fileInput = document.getElementById('resumePdfInput');
+        const resBox = document.getElementById('parseResults');
+        const btnText = document.getElementById('matchPdfBtn');
+
+        if (!fileInput.files[0]) return alert("Please select a PDF file first.");
+
+        btnText.innerHTML = '<span class="loading-spinner"></span> Matching from PDF...';
+        resBox.innerHTML = '<div class="empty-placeholder">Reading PDF resume and matching alumni...</div>';
+        const formData = new FormData();
+        formData.append('file', fileInput.files[0]);
+
+        try {
+            const resp = await fetch(`${API_BASE}/api/ai/match-resume-pdf`, {
+                method: 'POST',
+                body: formData
+            });
+            const data = await resp.json();
+            renderParsedProfile(data.extractedProfile, data.matchedAlumni, resBox);
+        } catch (err) {
+            resBox.innerHTML = `<div class="empty-placeholder" style="color: #ef4444;">Error matching PDF: ${err.message}</div>`;
+        } finally {
+            btnText.innerHTML = '🎯 Match Alumni from PDF';
+        }
+    }
+
+    function renderParsedProfile(prof, matches, container) {
+        if (!prof) return container.innerHTML = '<div class="empty-placeholder">No profile extracted.</div>';
+        
+        let html = `
+            <div class="result-card">
+                <div class="card-header">
+                    <div>
+                        <div class="card-title">${prof.name}</div>
+                        <div class="card-subtitle">${prof.headline || prof.role || 'Tech Professional'} ${prof.company ? '@ ' + prof.company : ''}</div>
+                    </div>
+                    <span class="badge badge-success">Parsed Profile</span>
+                </div>
+                <div class="reason-box" style="border-left-color: #10b981; margin-bottom: 0.8rem;">
+                    📝 <b>Bio Summary:</b> ${prof.bio}
+                </div>
+                <div style="font-size: 0.85rem; margin-bottom: 0.4rem; font-weight:600; color:#cbd5e1;">Skills Extracted:</div>
+                <div class="skills-tag-list">
+                    ${(prof.skills || []).map(s => `<span class="skill-tag">${s}</span>`).join('')}
+                </div>
+                ${prof.education && prof.education.length ? `<div style="font-size:0.8rem; color:#94a3b8; margin-top:0.4rem;">🎓 <b>Education:</b> ${prof.education.join(', ')}</div>` : ''}
+            </div>
+        `;
+
+        if (matches && matches.length > 0) {
+            html += `<div style="font-weight:700; margin: 1.2rem 0 0.6rem 0; color:#f8fafc;">🎯 Top Matched Alumni Mentors for this Resume:</div>`;
+            matches.forEach(m => {
+                html += `
+                    <div class="result-card">
+                        <div class="card-header">
+                            <div>
+                                <div class="card-title">${m.name}</div>
+                                <div class="card-subtitle">${m.role} @ ${m.company}</div>
+                            </div>
+                            <span class="badge badge-success">${m.matchPercentage} Match</span>
+                        </div>
+                        <div class="skills-tag-list">
+                            ${m.matchedSkills.map(s => `<span class="skill-tag">${s}</span>`).join('')}
+                        </div>
+                        <div class="reason-box">💡 <b>Match Reason:</b> ${m.reason}</div>
+                    </div>
+                `;
+            });
+        }
+
+        container.innerHTML = html;
+    }
+
+    // 4. Generate Career Roadmap
+    async function generateRoadmap() {
+        const name = document.getElementById('rmName').value;
+        const role = document.getElementById('rmRole').value;
+        const company = document.getElementById('rmCompany').value;
+        const skills = document.getElementById('rmSkills').value.split(',').map(s => s.trim()).filter(Boolean);
+        const weeks = parseInt(document.getElementById('rmWeeks').value) || 12;
+
+        const resBox = document.getElementById('roadmapResults');
+        const btnText = document.getElementById('roadmapBtnText');
+
+        btnText.innerHTML = '<span class="loading-spinner"></span> Generating AI Roadmap...';
+        resBox.innerHTML = '<div class="empty-placeholder">Analyzing skill gaps and building 4-phase roadmap...</div>';
+
+        try {
+            const resp = await fetch(`${API_BASE}/api/ai/generate-roadmap`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    studentName: name,
+                    targetRole: role,
+                    targetCompany: company,
+                    currentSkills: skills,
+                    timelineWeeks: weeks
+                })
+            });
+            const data = await resp.json();
+            
+            let html = `
+                <div class="result-card">
+                    <div class="card-header">
+                        <div>
+                            <div class="card-title">Target: ${data.targetRole} ${data.targetCompany ? '@ ' + data.targetCompany : ''}</div>
+                            <div class="card-subtitle">Student: ${data.studentName}</div>
+                        </div>
+                        <span class="badge badge-success">Readiness: ${data.skillGapAnalysis.readinessScore}/100</span>
+                    </div>
+                    <div class="reason-box">💡 <b>Skill-Gap Summary:</b> ${data.skillGapAnalysis.analysisSummary}</div>
+                    <div style="font-size:0.85rem; font-weight:600; margin-top:0.6rem; color:#f87171;">Missing Critical Skills:</div>
+                    <div class="skills-tag-list">
+                        ${data.skillGapAnalysis.missingSkills.map(s => `<span class="skill-tag" style="background:rgba(239,68,68,0.15); color:#fca5a5;">${s}</span>`).join('')}
+                    </div>
+                </div>
+                <div style="font-weight:700; margin: 1rem 0 0.5rem 0; color:#f8fafc;">📌 Chronological Learning Roadmap:</div>
+            `;
+
+            data.phases.forEach(p => {
+                html += `
+                    <div class="phase-item">
+                        <div style="font-weight:700; font-size:0.95rem; color:#818cf8;">Phase ${p.phaseNumber}: ${p.title} (${p.duration})</div>
+                        <div style="font-size:0.85rem; color:#94a3b8; margin:0.3rem 0;">${p.description}</div>
+                        <div class="skills-tag-list">
+                            ${p.skillsToLearn.map(s => `<span class="skill-tag">${s}</span>`).join('')}
+                        </div>
+                        ${p.keyProjects && p.keyProjects.length ? `<div style="font-size:0.8rem; color:#34d399; margin-top:0.3rem;">🛠️ <b>Portfolio Project:</b> ${p.keyProjects[0]}</div>` : ''}
+                    </div>
+                `;
+            });
+
+            if (data.recommendedAlumniMentors && data.recommendedAlumniMentors.length) {
+                html += `<div style="font-weight:700; margin: 1rem 0 0.5rem 0; color:#f8fafc;">👥 Recommended Alumni Mentors:</div>`;
+                data.recommendedAlumniMentors.forEach(m => {
+                    html += `
+                        <div class="result-card" style="margin-bottom:0.5rem; padding:0.75rem;">
+                            <div style="font-weight:600; font-size:0.9rem;">${m.name} (${m.role} @ ${m.company})</div>
+                            <div style="font-size:0.8rem; color:#818cf8;">Match: ${m.matchPercentage}</div>
+                        </div>
+                    `;
+                });
+            }
+
+            resBox.innerHTML = html;
+        } catch (err) {
+            resBox.innerHTML = `<div class="empty-placeholder" style="color: #ef4444;">Error: ${err.message}</div>`;
+        } finally {
+            btnText.innerHTML = 'Generate 4-Phase Learning Roadmap';
+        }
+    }
+</script>
+</body>
+</html>

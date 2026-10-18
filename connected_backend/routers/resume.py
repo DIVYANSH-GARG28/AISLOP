@@ -5,6 +5,7 @@ and serving interactive RAG (Retrieval-Augmented Generation) query responses
 integrated with n8n and Gemini AI.
 """
 
+import os
 import io
 import re
 import logging
@@ -54,6 +55,8 @@ class RAGChatRequest(BaseModel):
     resume_text: Optional[str] = None
     target_role: Optional[str] = None
     student_name: Optional[str] = None
+    api_key: Optional[str] = None
+    provider: Optional[str] = "gemini"
 
 
 class ParseResumeJSONRequest(BaseModel):
@@ -504,7 +507,25 @@ async def resume_rag_chat(request: RAGChatRequest):
             "Projects: Distributed Vector Search Engine (C++ & Python), AI Mentor Matching Platform."
         )
 
-    # 1. Attempt to dispatch query to n8n webhook if configured and available
+    # 1. Live Generative AI Model (Google Gemini or OpenAI) if API key present
+    llm_res = await query_live_llm_model(
+        query=query,
+        resume_text=resume_text,
+        target_role=request.target_role or "Software Engineer",
+        student_name=request.student_name or "Student",
+        api_key=request.api_key,
+        provider=request.provider or "gemini"
+    )
+    if llm_res:
+        return {
+            "success": True,
+            "query": query,
+            "answer": llm_res["answer"],
+            "source": "live_ai_model",
+            "model": llm_res["model"]
+        }
+
+    # 2. Attempt to dispatch query to n8n webhook if configured and available
     n8n_url = settings.N8N_WEBHOOK_URL or "http://localhost:5678/webhook/resume-rag"
     n8n_success = False
     answer_text = ""
@@ -533,7 +554,7 @@ async def resume_rag_chat(request: RAGChatRequest):
     except Exception as e:
         logger.debug(f"n8n webhook offline or timed out ({e}). Executing high-precision local RAG engine.")
 
-    # 2. Intelligent High-Precision RAG Engine Fallback
+    # 3. Intelligent High-Precision RAG Engine Fallback
     if not n8n_success or not answer_text:
         answer_text = synthesize_rag_response(query, resume_text, request.target_role or "Software Engineer")
 
@@ -544,6 +565,96 @@ async def resume_rag_chat(request: RAGChatRequest):
         "source": "n8n_rag_pipeline" if n8n_success else "local_rag_engine",
         "model": "Gemini 2.5 Pro (connectED RAG)"
     }
+
+
+async def query_live_llm_model(
+    query: str,
+    resume_text: str,
+    target_role: str,
+    student_name: str,
+    api_key: Optional[str] = None,
+    provider: Optional[str] = "gemini"
+) -> Optional[Dict[str, str]]:
+    """Calls live LLM models (Google Gemini or OpenAI) using httpx if an API key is available.
+    
+    Returns dict with 'answer' and 'model' on success, or None on fallback.
+    """
+    gemini_key = api_key or os.getenv("GEMINI_API_KEY") or os.getenv("GOOGLE_API_KEY")
+    openai_key = api_key if provider == "openai" else os.getenv("OPENAI_API_KEY")
+
+    # 1. Google Gemini Live Integration
+    if gemini_key:
+        try:
+            url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={gemini_key}"
+            system_prompt = (
+                f"You are ConnectEd's AI Career & Placement Copilot for university students.\n"
+                f"Candidate Name: {student_name}\n"
+                f"Target Role: {target_role}\n\n"
+                f"Candidate's Indexed Resume Context:\n"
+                f"\"\"\"\n{resume_text}\n\"\"\"\n\n"
+                f"Instructions:\n"
+                f"1. Answer the candidate's question strictly grounded in their real projects, technologies, and achievements.\n"
+                f"2. Use clean GitHub-flavored markdown with headers, bullet points, and bold text.\n"
+                f"3. Provide actionable, high-yield advice (quantifiable metrics, STAR behavioral guidance, technical architecture).\n"
+            )
+            payload = {
+                "contents": [
+                    {
+                        "role": "user",
+                        "parts": [{"text": f"{system_prompt}\n\nQuestion: {query}"}]
+                    }
+                ],
+                "generationConfig": {
+                    "temperature": 0.4,
+                    "maxOutputTokens": 1024
+                }
+            }
+            async with httpx.AsyncClient(timeout=10.0) as client:
+                res = await client.post(url, json=payload)
+                if res.status_code == 200:
+                    data = res.json()
+                    candidates = data.get("candidates", [])
+                    if candidates and "content" in candidates[0]:
+                        parts = candidates[0]["content"].get("parts", [])
+                        if parts and "text" in parts[0]:
+                            return {
+                                "answer": parts[0]["text"].strip(),
+                                "model": "Google Gemini 1.5 Flash (Live Model)"
+                            }
+        except Exception as e:
+            logger.warning(f"Live Gemini API call failed, falling back: {e}")
+
+    # 2. OpenAI / Compatible endpoint
+    if openai_key:
+        try:
+            url = "https://api.openai.com/v1/chat/completions"
+            payload = {
+                "model": "gpt-4o-mini",
+                "messages": [
+                    {
+                        "role": "system",
+                        "content": f"You are ConnectEd AI Placement Copilot. Student: {student_name}, Role: {target_role}. Resume: {resume_text[:2000]}"
+                    },
+                    {"role": "user", "content": query}
+                ],
+                "temperature": 0.4,
+                "max_tokens": 800
+            }
+            headers = {"Authorization": f"Bearer {openai_key}"}
+            async with httpx.AsyncClient(timeout=10.0) as client:
+                res = await client.post(url, json=payload, headers=headers)
+                if res.status_code == 200:
+                    data = res.json()
+                    choice = data.get("choices", [{}])[0].get("message", {}).get("content", "")
+                    if choice:
+                        return {
+                            "answer": choice.strip(),
+                            "model": "OpenAI GPT-4o-mini (Live Model)"
+                        }
+        except Exception as e:
+            logger.warning(f"OpenAI API call failed, falling back: {e}")
+
+    return None
 
 
 def synthesize_rag_response(query: str, resume_text: str, target_role: str) -> str:

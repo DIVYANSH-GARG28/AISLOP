@@ -1,0 +1,219 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --bg-canvas: #FBF9F5;       /* Warm ivory editorial paper stock */
+    --bg-surface: #FFFFFF;      /* Pure white card surface */
+    --bg-card: #FFFFFF;
+    --border-ink: #111111;      /* Crisp bold ink border */
+    --border-subtle: #E8E5DD;
+    --text-primary: #111111;    /* High-contrast ink text */
+    --text-secondary: #52535A;
+    --text-muted: #82848D;
+    --mark: #E2F952;            /* Electric lime highlighter */
+    --shadow-hard: 4px 4px 0px 0px #111111;
+  }
+
+  .dark {
+    --bg-canvas: #111215;       /* Deep warm graphite sheet */
+    --bg-surface: #181A20;      /* Dark card surface */
+    --bg-card: #181A20;
+    --border-ink: #FFFFFF;      /* Crisp white contrast outline in dark mode */
+    --border-subtle: #292C36;
+    --text-primary: #F7F7F9;
+    --text-secondary: #A6A9B6;
+    --text-muted: #6C707E;
+    --mark: #E2F952;
+    --shadow-hard: 4px 4px 0px 0px #E2F952;
+  }
+
+  html, body {
+    background-color: var(--bg-canvas);
+    color: var(--text-primary);
+    font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    transition: background-color 0.2s ease, color 0.2s ease;
+  }
+}
+
+/* ======================================================== */
+/* Editorial Typography & Neo-Brutalist Swiss Tokens */
+/* ======================================================== */
+
+.font-display {
+  font-family: 'Fraunces', Georgia, serif;
+  font-optical-sizing: auto;
+  letter-spacing: -0.03em;
+}
+
+.font-mono {
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+}
+
+/* Hard Neo-Brutalist Box Cards */
+.editorial-card {
+  background-color: var(--bg-card);
+  border: 2px solid var(--border-ink);
+  border-radius: 16px;
+  box-shadow: var(--shadow-hard);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.editorial-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 6px 6px 0px 0px #111111;
+}
+
+.dark .editorial-card:hover {
+  box-shadow: 6px 6px 0px 0px #E2F952;
+}
+
+/* Neo-Brutalist Tactile Action Button */
+.editorial-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  border: 2px solid var(--border-ink);
+  border-radius: 12px;
+  box-shadow: 3px 3px 0px 0px var(--border-ink);
+  transition: transform 0.1s ease, box-shadow 0.1s ease;
+  user-select: none;
+}
+
+.editorial-btn:active {
+  transform: translate(2px, 2px);
+  box-shadow: 0px 0px 0px 0px var(--border-ink);
+}
+
+/* Electric Lime Highlighter Stamp */
+.editorial-lime-badge {
+  background-color: #E2F952;
+  color: #111111;
+  border: 1.5px solid #111111;
+  border-radius: 6px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 2px 8px;
+  box-shadow: 1.5px 1.5px 0px 0px #111111;
+}
+
+/* Text Highlighter Stroke */
+.hl-mark {
+  background-color: #E2F952;
+  color: #111111;
+  padding: 0 4px;
+  border-radius: 2px;
+  font-weight: 800;
+  border: 1px solid rgba(17, 17, 17, 0.4);
+}
+
+/* Monospace Studio Stamp Tag */
+.studio-tag {
+  display: inline-flex;
+  align-items: center;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  padding: 2px 8px;
+  border: 1.5px solid var(--border-ink);
+  border-radius: 6px;
+  background-color: var(--bg-surface);
+  color: var(--text-primary);
+  box-shadow: 1.5px 1.5px 0px 0px var(--border-ink);
+}
+
+/* Swiss Gridline Separators */
+.swiss-divider {
+  border-color: var(--border-ink);
+  opacity: 0.15;
+}
+
+.dark .swiss-divider {
+  border-color: #FFFFFF;
+  opacity: 0.2;
+}
+
+/* Backward compatibility mapping */
+.apple-card {
+  background-color: var(--bg-card);
+  border: 2px solid var(--border-ink);
+  border-radius: 18px;
+  box-shadow: 4px 4px 0px 0px var(--border-ink);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.dark .apple-card {
+  box-shadow: 4px 4px 0px 0px #E2F952;
+}
+
+.pro-card {
+  background-color: var(--bg-card);
+  border: 2px solid var(--border-ink);
+  border-radius: 16px;
+  box-shadow: 3px 3px 0px 0px var(--border-ink);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.dark .pro-card {
+  box-shadow: 3px 3px 0px 0px #E2F952;
+}
+
+/* Entrance Animations */
+@keyframes enterUp {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-enter {
+  animation: enterUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* Tactile Keyboard Shortcut */
+.kbd-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1px 6px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  font-weight: 700;
+  color: #111111;
+  background: #E2F952;
+  border: 1px solid #111111;
+  border-radius: 4px;
+  box-shadow: 1px 1px 0px 0px #111111;
+}
+
+/* Custom Minimal Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #111111;
+  border-radius: 999px;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: #E2F952;
+}

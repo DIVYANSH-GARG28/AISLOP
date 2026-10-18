@@ -1,0 +1,53 @@
+{
+  "name": "connected",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "ConnectEd Hackathon Project",
+  "main": "src/backend/server.js",
+  "scripts": {
+    "dev": "vite",
+    "dev:backend": "nodemon src/backend/server.js",
+    "start": "node src/backend/server.js",
+    "build": "vite build",
+    "preview": "vite preview",
+    "prisma:generate": "prisma generate",
+    "db:seed": "node prisma/seed.js",
+    "test:search": "node src/ai/testSearch.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "prisma": {
+    "seed": "node prisma/seed.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sidharth756/ConnectEd.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/sidharth756/ConnectEd/issues"
+  },
+  "homepage": "https://github.com/sidharth756/ConnectEd#readme",
+  "dependencies": {
+    "@prisma/client": "^6.19.3",
+    "bcryptjs": "^3.0.3",
+    "cors": "^2.8.6",
+    "dotenv": "^16.4.5",
+    "express": "^5.2.1",
+    "jsonwebtoken": "^9.0.3",
+    "lucide-react": "^0.469.0",
+    "prisma": "^6.19.3",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "zod": "^3.22.4"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.3.4",
+    "autoprefixer": "^10.4.20",
+    "nodemon": "^3.1.14",
+    "postcss": "^8.4.49",
+    "tailwindcss": "^3.4.16",
+    "vite": "^6.0.5"
+  }
+}

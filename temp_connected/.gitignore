@@ -1,0 +1,36 @@
+# Node & Frontend Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Python Cache & Virtual Environments
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+ENV/
+.venv/
+
+# Environment Variables & API Secrets
+.env
+.env.local
+.env.*.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Temporary Scratch Files & Logs
+scratch/
+scratch_*.py
+dist/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS System Files
+.DS_Store
+Thumbs.db

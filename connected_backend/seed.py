@@ -6,6 +6,10 @@ skills catalogue, and active mentorship requests.
 
 import time
 import logging
+import os
+import re
+import json
+from typing import List, Dict, Any
 from connected_backend.database import db_manager
 from connected_backend.models import (
     UserRole,
@@ -15,6 +19,24 @@ from connected_backend.models import (
 from connected_backend.security import hash_password
 
 logger = logging.getLogger("connected.seed")
+
+
+def load_verified_alumni_mock_data() -> List[Dict[str, Any]]:
+    """Reads and parses the 128 verified institutional alumni from alumniMockData.js."""
+    base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    mock_file = os.path.join(base_dir, "temp_connected", "src", "ai", "data", "alumniMockData.js")
+    if not os.path.exists(mock_file):
+        logger.warning(f"alumniMockData.js not found at {mock_file}")
+        return []
+    try:
+        with open(mock_file, "r", encoding="utf-8") as f:
+            content = f.read()
+        json_str = re.sub(r'^(const|let|var)\s+\w+\s*=\s*', '', content.strip())
+        json_str = re.sub(r';?\s*export\s+default\s+\w+;?\s*$', '', json_str.strip())
+        return json.loads(json_str)
+    except Exception as e:
+        logger.error(f"Failed to load verified alumni mock data: {e}")
+        return []
 
 
 async def seed_database(force: bool = False):
@@ -97,12 +119,12 @@ async def seed_database(force: bool = False):
             "created_at": now_iso
         }
     ]
-    await db_manager.users.insert_many(alumni_users)
 
     alumni_profiles = [
         {
             "id": "alum_1",
             "user_id": "alum_1",
+            "institutional_id": "KCE-ALUM-2019-001",
             "name": "Priya Sharma",
             "email": "priya.sharma@google.com",
             "avatar_url": "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&q=80&w=250",
@@ -133,6 +155,7 @@ async def seed_database(force: bool = False):
         {
             "id": "alumni_002",
             "user_id": "alumni_002",
+            "institutional_id": "KCE-ALUM-2018-002",
             "name": "Aravind Nair",
             "email": "aravind.n@microsoft.com",
             "avatar_url": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=250",
@@ -165,6 +188,7 @@ async def seed_database(force: bool = False):
         {
             "id": "alum_2",
             "user_id": "alum_2",
+            "institutional_id": "KCE-ALUM-2017-003",
             "name": "Marcus Vance",
             "email": "marcus.v@stripe.com",
             "avatar_url": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=250",
@@ -195,6 +219,7 @@ async def seed_database(force: bool = False):
         {
             "id": "alum_3",
             "user_id": "alum_3",
+            "institutional_id": "KCE-ALUM-2020-004",
             "name": "Elena Rostova",
             "email": "elena.r@meta.com",
             "avatar_url": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=250",
@@ -224,6 +249,7 @@ async def seed_database(force: bool = False):
         {
             "id": "alum_4",
             "user_id": "alum_4",
+            "institutional_id": "KCE-ALUM-2021-005",
             "name": "David Kim",
             "email": "david.kim@vercel.com",
             "avatar_url": "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&q=80&w=250",
@@ -251,7 +277,74 @@ async def seed_database(force: bool = False):
             "linkedin_url": "https://linkedin.com/in/david-kim-vercel"
         }
     ]
+
+    # Incorporate the 128 verified real alumni from the alumniMockData dataset
+    verified_alumni_raw = load_verified_alumni_mock_data()
+    existing_ids = {a["id"] for a in alumni_profiles}
+    existing_emails = {a["email"] for a in alumni_users}
+
+    for raw in verified_alumni_raw:
+        raw_id = str(raw.get("id") or "alum-0")
+        if raw_id in existing_ids:
+            continue
+
+        year = int(raw.get("graduationYear") or 2021)
+        num_part = str(raw.get("username") or raw_id).replace("alum-", "").replace("alum_", "").zfill(3)
+        inst_id = f"KCE-ALUM-{year}-{num_part}"
+        user_email = raw.get("email") or f"{raw_id}@alumni.kce.ac.in"
+        if user_email in existing_emails:
+            user_email = f"{raw_id}_{user_email}"
+        existing_emails.add(user_email)
+        existing_ids.add(raw_id)
+
+        user_name = raw.get("name", "Alumni Member")
+        avatar = raw.get("avatarUrl") or raw.get("avatar") or "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&q=80&w=250"
+        role_str = raw.get("role") or raw.get("title") or "Software Engineer"
+        comp_str = raw.get("company") or "Tech Partner"
+
+        alumni_users.append({
+            "id": raw_id,
+            "email": user_email,
+            "name": user_name,
+            "role": UserRole.ALUMNI.value,
+            "password_hash": default_pw_hash,
+            "avatar_url": avatar,
+            "is_verified": True,
+            "created_at": now_iso
+        })
+
+        alumni_profiles.append({
+            "id": raw_id,
+            "user_id": raw_id,
+            "institutional_id": inst_id,
+            "name": user_name,
+            "email": user_email,
+            "avatar_url": avatar,
+            "current_role": role_str,
+            "title": role_str,
+            "company": comp_str,
+            "location": raw.get("location") or "India",
+            "graduation_year": year,
+            "degree": raw.get("degree") or "B.E. Engineering",
+            "major": raw.get("major") or raw.get("domain") or "Engineering",
+            "university": raw.get("university") or "KCE",
+            "skills": raw.get("skills") if isinstance(raw.get("skills"), list) else ["Engineering"],
+            "verification_status": VerificationStatus.VERIFIED.value,
+            "is_verified": True,
+            "verified_at": "2024-01-15T10:00:00Z",
+            "impact_score": raw.get("impactScore") or 750,
+            "mentees_guided": raw.get("menteesGuided") or 10,
+            "badge_tier": raw.get("badgeTier") or "Verified Alum ✨",
+            "bio": raw.get("bio") or f"{user_name} is a verified alumnus at {comp_str}.",
+            "availability": raw.get("availability") or "Available for Mentorship",
+            "is_mentor": bool(raw.get("willingToMentor", True)),
+            "max_mentees": 4,
+            "linkedin_url": raw.get("linkedInUrl") or raw.get("linkedin") or ""
+        })
+
+    await db_manager.users.insert_many(alumni_users)
     await db_manager.alumni.insert_many(alumni_profiles)
+    logger.info(f"✅ Successfully seeded {len(alumni_profiles)} verified alumni into the database!")
 
     # ==========================================
     # 2. Students

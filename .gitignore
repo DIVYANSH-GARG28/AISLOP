@@ -1,0 +1,32 @@
+# Node & Frontend Dependencies
+node_modules/
+temp_connected/node_modules/
+temp_alumconnect/node_modules/
+temp_alumconnect/backend/node_modules/
+temp_alumconnect/frontend/node_modules/
+
+# Build outputs
+dist/
+temp_connected/dist/
+
+# Python Cache & Bytecode
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Environment Variables & Secrets
+.env
+.env.local
+
+# Vite cache & temp
+.vite/
+temp_connected/node_modules/.vite/
+
+# OS Files
+.DS_Store
+Thumbs.db
+
+# Submodule backups
+.git_submodule_backup/
+temp_connected/.git_submodule_backup/
